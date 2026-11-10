@@ -1,0 +1,694 @@
+<title>Arcana Daily</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Nunito:wght@500;600;700;800;900&display=swap">
+<style>
+/* Layout: one narrow column — a winding lesson path of card nodes, with a full-screen lesson sheet on top. */
+:root{
+  --bg:#f4f0fa; --surface:#ffffff; --ink:#24183a; --muted:#6c5f86; --line:#e3daf0;
+  --accent:#7b4dd6; --accent-deep:#5a32ab; --accent-soft:#ece3fd;
+  --gold:#d99a1c; --gold-deep:#a8740b; --gold-soft:#fdf1d6;
+  --good:#24a86e; --good-deep:#1a7e52; --good-bg:#dcf6e8;
+  --bad:#de3f45; --bad-deep:#ab2a2f; --bad-bg:#fde4e4;
+  --locked:#ddd5ea; --locked-deep:#c2b7d4; --locked-ink:#9a8fb0;
+  --card:#fbf6ea; --card-edge:#d8c9a6; --card-ink:#2b2140; --major:#5b33b0;
+  --fire:#d4552a; --water:#2e7bcb; --air:#5f7393; --earth:#3c9450; --leaf:#4f9a45;
+  --f-display:"Cinzel", "Trajan Pro", Georgia, serif;
+  --f-ui:"Nunito", ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#161025; --surface:#221a35; --ink:#f1ecfb; --muted:#a89cc4; --line:#352a4f;
+  --accent:#a07af2; --accent-deep:#6a44c4; --accent-soft:#2f2450;
+  --gold:#f0b63e; --gold-deep:#b0800f; --gold-soft:#3a2f1a;
+  --good:#3ccf8e; --good-deep:#22915e; --good-bg:#16382a;
+  --bad:#ff6b70; --bad-deep:#c23a3f; --bad-bg:#3d1d25;
+  --locked:#3a3052; --locked-deep:#281f3d; --locked-ink:#7d7198;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#161025; --surface:#221a35; --ink:#f1ecfb; --muted:#a89cc4; --line:#352a4f;
+  --accent:#a07af2; --accent-deep:#6a44c4; --accent-soft:#2f2450;
+  --gold:#f0b63e; --gold-deep:#b0800f; --gold-soft:#3a2f1a;
+  --good:#3ccf8e; --good-deep:#22915e; --good-bg:#16382a;
+  --bad:#ff6b70; --bad-deep:#c23a3f; --bad-bg:#3d1d25;
+  --locked:#3a3052; --locked-deep:#281f3d; --locked-ink:#7d7198;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{background:var(--bg)}
+body{color:var(--ink);font-family:var(--f-ui);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+h1,h2,h3{text-wrap:balance;margin:0}
+.gutter{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:560px;margin:0 auto}
+
+/* chunky pressable buttons */
+.btn{--c:var(--accent);--cd:var(--accent-deep);--ct:#fff;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  border:0;border-radius:16px;padding:14px 22px;background:var(--c);color:var(--ct);
+  box-shadow:0 4px 0 var(--cd);font-weight:900;font-size:15px;letter-spacing:.08em;text-transform:uppercase;
+  cursor:pointer;transition:transform .08s,box-shadow .08s,filter .15s}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{transform:translateY(4px);box-shadow:0 0 0 var(--cd)}
+.btn[disabled]{--c:var(--locked);--cd:var(--locked-deep);--ct:var(--locked-ink);cursor:not-allowed;filter:none}
+.btn.gold{--c:var(--gold);--cd:var(--gold-deep);--ct:#2a1c00}
+.btn.good{--c:var(--good);--cd:var(--good-deep);--ct:#fff}
+.btn.bad{--c:var(--bad);--cd:var(--bad-deep);--ct:#fff}
+.btn.ghost{--c:var(--surface);--cd:var(--line);--ct:var(--accent);border:2px solid var(--line)}
+.btn.wide{width:100%}
+
+/* top bar */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:2px solid var(--line)}
+.topbar .wrap{display:flex;align-items:center;gap:12px;padding-block:10px}
+.brand{font-family:var(--f-display);font-weight:800;font-size:19px;letter-spacing:.04em;margin-right:auto;display:flex;align-items:center;gap:8px}
+.brand svg{width:22px;height:22px}
+.stat{display:flex;align-items:center;gap:5px;font-weight:900;font-variant-numeric:tabular-nums;font-size:15px}
+.stat svg{width:22px;height:22px}
+.stat.streak{color:var(--fire)} .stat.streak.off{color:var(--locked-ink)}
+.stat.xp{color:var(--gold)}
+.stat.cards{color:var(--accent)}
+
+/* today panel */
+.today{margin-block:20px 8px;background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:18px;display:grid;grid-template-columns:96px 1fr;gap:18px;align-items:center}
+.today .mini-card{width:96px}
+.today .info{min-width:0;display:flex;flex-direction:column;gap:6px}
+.eyebrow{font-size:12px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0}
+.today h2{font-family:var(--f-display);font-size:22px;line-height:1.15}
+.today p{margin:0;color:var(--muted);font-weight:600;font-size:14.5px}
+.today .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.today .actions .btn{padding:12px 18px;font-size:14px}
+.sync{font-size:12.5px;color:var(--muted);font-weight:700;text-align:center;margin:6px 0 0}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;background:var(--accent-soft);color:var(--accent);width:max-content}
+.chip.rev{background:var(--gold-soft);color:var(--gold-deep)}
+:root[data-theme="dark"] .chip.rev{color:var(--gold)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .chip.rev{color:var(--gold)}}
+
+/* path */
+.unit{margin-top:28px}
+.unit-head{border-radius:18px;padding:16px 18px;background:var(--u);color:#fff;box-shadow:0 4px 0 color-mix(in srgb,var(--u) 70%,#000)}
+.unit-head .eyebrow{color:rgba(255,255,255,.82)}
+.unit-head h2{font-family:var(--f-display);font-size:21px;margin-top:2px}
+.unit-head p{margin:4px 0 0;font-weight:600;font-size:14px;opacity:.92}
+.unit-head .bar{height:8px;border-radius:99px;background:rgba(255,255,255,.28);margin-top:10px;overflow:hidden}
+.unit-head .bar i{display:block;height:100%;background:#fff;border-radius:99px}
+.path{list-style:none;margin:0;padding:22px 0 6px;display:flex;flex-direction:column;align-items:center;gap:14px}
+.node-wrap{transform:translateX(var(--x));display:flex;flex-direction:column;align-items:center;gap:4px;position:relative}
+.node{width:70px;height:64px;border-radius:50%;border:0;cursor:pointer;display:grid;place-items:center;
+  background:var(--nc);box-shadow:0 6px 0 var(--ncd);transition:transform .08s,box-shadow .08s;position:relative}
+.node:active{transform:translateY(6px);box-shadow:0 0 0 var(--ncd)}
+.node svg{width:34px;height:34px}
+.node.done{--nc:var(--gold);--ncd:var(--gold-deep);color:#3a2700}
+.node.current{--nc:var(--accent);--ncd:var(--accent-deep);color:#fff;width:80px;height:72px}
+.node.waiting{--nc:var(--accent-soft);--ncd:var(--locked-deep);color:var(--accent)}
+.node.locked{--nc:var(--locked);--ncd:var(--locked-deep);color:var(--locked-ink)}
+.node.current::after{content:"";position:absolute;inset:-9px;border-radius:50%;border:4px solid var(--accent);opacity:.35;animation:pulse 1.8s ease-in-out infinite}
+.node .num{font-family:var(--f-display);font-weight:800;font-size:17px}
+.node .rev-mark{position:absolute;right:-4px;bottom:-4px;width:24px;height:24px;border-radius:50%;background:var(--surface);border:2px solid var(--line);display:grid;place-items:center;color:var(--gold-deep)}
+.node .rev-mark svg{width:14px;height:14px}
+.node-label{font-size:12px;font-weight:800;color:var(--muted);white-space:nowrap}
+.node-wrap.is-current .node-label{color:var(--accent)}
+.start-bubble{position:absolute;bottom:calc(100% + 12px);left:50%;transform:translateX(-50%);background:var(--surface);color:var(--accent);border:2px solid var(--line);border-radius:12px;padding:6px 12px;font-weight:900;font-size:13px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;animation:bob 2.2s ease-in-out infinite}
+.start-bubble::after{content:"";position:absolute;top:100%;left:50%;margin-left:-7px;border:7px solid transparent;border-top-color:var(--line)}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.35}50%{transform:scale(1.08);opacity:.1}}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-4px)}}
+.foot{color:var(--muted);font-size:13px;text-align:center;padding-block:28px 40px;font-weight:600}
+
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);opacity:0;background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;font-weight:800;font-size:14px;z-index:60;transition:.25s;pointer-events:none;max-width:calc(100% - 32px);text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* lesson sheet */
+.sheet{position:fixed;inset:0;z-index:40;background:var(--bg);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px)}
+.sheet-head .wrap{display:flex;align-items:center;gap:14px;padding-block:14px}
+.icon-btn{border:0;background:none;padding:6px;border-radius:10px;cursor:pointer;color:var(--muted);display:grid;place-items:center}
+.icon-btn svg{width:24px;height:24px}
+.progress{flex:1;height:16px;border-radius:99px;background:var(--locked);overflow:hidden}
+.progress i{display:block;height:100%;width:0;border-radius:99px;background:var(--good);transition:width .35s ease;box-shadow:inset 0 -5px 0 rgba(0,0,0,.08), inset 0 4px 0 rgba(255,255,255,.3)}
+.hearts{display:flex;align-items:center;gap:4px;color:var(--bad);font-weight:900;font-variant-numeric:tabular-nums}
+.hearts svg{width:24px;height:24px}
+.sheet-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.sheet-body .wrap{padding-block:12px 32px}
+.sheet-foot{border-top:2px solid var(--line);background:var(--bg);padding-bottom:max(16px,env(safe-area-inset-bottom,0px));transition:background .2s,border-color .2s}
+.sheet-foot .wrap{padding-top:16px;display:flex;flex-direction:column;gap:12px}
+.sheet-foot.good{background:var(--good-bg);border-color:transparent}
+.sheet-foot.bad{background:var(--bad-bg);border-color:transparent}
+.verdict{display:flex;gap:12px;align-items:flex-start;animation:rise .25s ease}
+.verdict .badge{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--surface)}
+.verdict .badge svg{width:24px;height:24px}
+.sheet-foot.good .verdict{color:var(--good-deep)} .sheet-foot.bad .verdict{color:var(--bad-deep)}
+:root[data-theme="dark"] .sheet-foot.good .verdict{color:var(--good)} :root[data-theme="dark"] .sheet-foot.bad .verdict{color:var(--bad)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .sheet-foot.good .verdict{color:var(--good)} :root:not([data-theme="light"]) .sheet-foot.bad .verdict{color:var(--bad)}}
+.verdict strong{display:block;font-size:19px;font-weight:900}
+.verdict span{display:block;font-weight:700;font-size:14.5px;min-width:0}
+@keyframes rise{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+
+/* learn view */
+.learn{display:grid;grid-template-columns:180px 1fr;gap:24px;align-items:start;margin-top:8px}
+.learn .big-card{width:180px;animation:deal .6s cubic-bezier(.2,.8,.2,1)}
+.learn .text{min-width:0;display:flex;flex-direction:column;gap:12px}
+.learn h1{font-family:var(--f-display);font-size:30px;line-height:1.1}
+.learn .meaning{font-size:17px;font-weight:600;margin:0}
+.kws{display:flex;flex-wrap:wrap;gap:8px}
+.kw{border:2px solid var(--line);border-bottom-width:4px;border-radius:12px;padding:5px 11px;font-weight:800;font-size:14px;background:var(--surface)}
+.facts{display:grid;gap:10px;margin-top:4px}
+.fact{background:var(--surface);border:2px solid var(--line);border-radius:16px;padding:12px 14px}
+.fact .eyebrow{margin-bottom:2px}
+.fact p{margin:0;font-weight:600;font-size:14.5px}
+.fact p b{font-weight:900}
+@keyframes deal{from{transform:translateY(24px) rotate(-6deg);opacity:0}to{transform:none;opacity:1}}
+
+/* question view */
+.q-type{font-size:13px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin:8px 0 6px;display:flex;align-items:center;gap:6px}
+.q-type.review{color:var(--gold-deep)}
+.q-prompt{font-size:22px;font-weight:900;line-height:1.3;margin:0 0 6px}
+.q-sub{color:var(--muted);font-weight:700;margin:0 0 14px}
+.q-quote{font-family:var(--f-display);font-weight:700;font-size:17px;line-height:1.45;background:var(--surface);border:2px solid var(--line);border-radius:16px;padding:14px 16px;margin:6px 0 16px}
+.q-row{display:grid;grid-template-columns:110px 1fr;gap:18px;align-items:start}
+.q-row .mid-card{width:110px}
+.q-row > div{min-width:0}
+.options{display:grid;gap:10px;margin-top:10px}
+.options.grid2{grid-template-columns:1fr 1fr}
+.opt{display:flex;gap:12px;align-items:center;text-align:left;width:100%;border:2px solid var(--line);border-bottom-width:4px;border-radius:16px;background:var(--surface);padding:12px 14px;font-weight:700;font-size:15.5px;cursor:pointer;transition:background .12s,border-color .12s,transform .08s}
+.opt:hover{background:var(--accent-soft)}
+.opt:active{transform:translateY(2px)}
+.opt .key{flex:none;width:26px;height:26px;border-radius:8px;border:2px solid var(--line);display:grid;place-items:center;font-size:12px;font-weight:900;color:var(--muted)}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.opt[aria-pressed="true"] .key{border-color:var(--accent);color:var(--accent)}
+.opt.right{border-color:var(--good);background:var(--good-bg);color:var(--good-deep)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg);color:var(--bad-deep)}
+.opt[disabled]{cursor:default}
+.opt .t{min-width:0}
+
+/* end view */
+.end{text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;padding-top:12px}
+.end .big-card{width:150px;animation:deal .6s cubic-bezier(.2,.8,.2,1)}
+.end h1{font-family:var(--f-display);font-size:30px;color:var(--gold-deep)}
+:root[data-theme="dark"] .end h1{color:var(--gold)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .end h1{color:var(--gold)}}
+.end p{margin:0;color:var(--muted);font-weight:700;max-width:40ch}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;max-width:420px;margin-top:6px}
+.tile{border:2px solid var(--tc);border-radius:16px;overflow:hidden;background:var(--surface)}
+.tile .h{background:var(--tc);color:#fff;font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:4px}
+.tile .v{padding:10px 4px;font-size:20px;font-weight:900;font-variant-numeric:tabular-nums;color:var(--tc)}
+
+@media (max-width:520px){
+  .learn{grid-template-columns:1fr;justify-items:center}
+  .learn .big-card{width:150px}
+  .learn .text{width:100%}
+  .learn h1{text-align:center;font-size:26px}
+  .learn .chip{margin:0 auto}
+  .q-row{grid-template-columns:76px 1fr;gap:12px}
+  .q-row .mid-card{width:76px}
+  .q-prompt{font-size:19px}
+  .options.grid2{grid-template-columns:1fr}
+  .today{grid-template-columns:72px 1fr;gap:14px;padding:14px}
+  .today .mini-card{width:72px}
+  .brand span{display:none}
+}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+
+<div id="home">
+  <header class="topbar gutter">
+    <div class="wrap">
+      <div class="brand"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2.5" width="14" height="19" rx="2.5" fill="var(--accent)"/><path d="M12 7.5l1.3 3 3.2.3-2.4 2.1.7 3.1-2.8-1.6-2.8 1.6.7-3.1-2.4-2.1 3.2-.3z" fill="var(--gold)"/></svg><span>Arcana Daily</span></div>
+      <div class="stat streak" id="st-streak" title="Day streak"></div>
+      <div class="stat xp" id="st-xp" title="Total XP"></div>
+      <div class="stat cards" id="st-cards" title="Lessons completed"></div>
+    </div>
+  </header>
+  <main class="gutter">
+    <div class="wrap">
+      <section class="today" id="today" aria-live="polite"></section>
+      <p class="sync" id="sync">Progress is saved on this device.</p>
+      <div id="units"></div>
+      <p class="foot">One card a day: 78 cards, upright and reversed, 156 lessons in all.<br>Reviews of finished lessons are always open.</p>
+    </div>
+  </main>
+</div>
+
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-label="Lesson">
+  <div class="sheet-head gutter"><div class="wrap">
+    <button class="icon-btn" id="close" aria-label="Leave lesson"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div class="progress" role="progressbar" aria-label="Lesson progress"><i id="prog"></i></div>
+    <div class="hearts" id="hearts"></div>
+  </div></div>
+  <div class="sheet-body gutter" id="sheet-body"><div class="wrap" id="stage"></div></div>
+  <div class="sheet-foot gutter" id="foot"><div class="wrap" id="foot-inner"></div></div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ---------------- Card data ----------------
+   Each line: upright keywords | reversed keywords | upright meaning | reversed meaning | symbol | what the symbol means
+   Order: 22 Major Arcana, then Wands, Cups, Swords, Pentacles (Ace → King). */
+const RAW = `
+new beginnings, spontaneity, faith, free spirit|recklessness, hesitation, naivety, holding back|A leap into the unknown made with trust: a fresh start where you don't need every answer yet.|Either jumping without looking or being too afraid to begin; the start is careless or blocked.|The cliff edge|A risk taken on faith, trusting the next step will appear.
+manifestation, skill, willpower, resourcefulness|manipulation, untapped talent, scattered energy, trickery|You have every tool you need; focus your will and turn ideas into action.|Talent is wasted or misused; plans lack focus, or someone is spinning illusions.|One hand raised, one pointing down|"As above, so below": channeling ideas into the material world.
+intuition, mystery, inner voice, the unconscious|secrets, ignored intuition, withdrawal, surface knowledge|Be still and listen inward; you already know the answer, it just isn't spoken yet.|You're ignoring your gut, or hidden information is keeping you in the dark.|The veil between two pillars|The boundary between the seen and the unseen.
+abundance, nurturing, fertility, sensuality|dependence, creative block, smothering, self-neglect|Growth flourishes through care: a season of creativity, comfort and nature.|An emotional or creative drought; giving too much to others or too little to yourself.|Ripening wheat at her feet|The harvest that comes from patient care.
+authority, structure, stability, leadership|rigidity, domination, lack of discipline, control issues|Build order and lead with clear rules; stability comes from structure.|Control turns tyrannical, or there's no structure at all.|Ram heads carved on the throne|Aries drive and decisive command.
+tradition, institutions, teaching, shared beliefs|rebellion, unconventional paths, dogma, questioning rules|Learn within an established system: mentors, rituals and community values.|Breaking from convention, or rules followed blindly without meaning.|Crossed keys at his feet|Access to knowledge passed down through tradition.
+love, harmony, choices, aligned values|imbalance, misalignment, indecision, disharmony|A meaningful union, or a choice made from your true values.|Values clash, a bond falls out of balance, or a choice is being avoided.|The angel above the couple|A higher alignment blessing the bond.
+determination, victory, control, momentum|lack of direction, aggression, obstacles, scattered drive|Harness opposing forces with willpower and drive forward to win.|Going nowhere, or forcing progress with too much aggression.|A black and a white sphinx|Opposing forces steered by will alone.
+courage, compassion, inner strength, patience|self-doubt, weakness, insecurity, raw emotion|Gentle courage tames wild impulses: strength through kindness, not force.|Fear or self-doubt takes over; your inner reserves feel drained.|A woman calmly holding a lion's jaws|Soft power mastering instinct.
+introspection, solitude, guidance, soul-searching|isolation, loneliness, withdrawal, lost path|Step back to seek your own truth; wisdom is found in quiet.|Solitude turns into isolation, or you're avoiding the reflection you need.|A lantern holding a star|Inner light that shows only the next step.
+cycles, fate, turning points, luck|bad luck, resisting change, setbacks, repeating patterns|Life turns: a change of fortune you can ride but not stop.|Fighting change, a downturn, or the same pattern coming round again.|The turning wheel|Everything rises and falls in cycles.
+fairness, truth, cause and effect, accountability|unfairness, dishonesty, avoiding responsibility, bias|Actions meet consequences; a fair and truthful decision is made.|Injustice or dodging responsibility; the scales are tipped.|Scales in one hand, a sword in the other|Impartial weighing followed by a clear-cut decision.
+surrender, pause, new perspective, letting go|stalling, resistance, limbo, needless sacrifice|Willingly pause and see things upside down to gain insight.|Stuck in limbo, resisting the pause, or sacrificing for nothing.|Hanging by one foot with a calm face|A chosen suspension that brings insight.
+endings, transformation, transition, release|resisting endings, stagnation, fear of change, lingering|One chapter closes so another can begin; deep transformation, rarely literal.|Holding onto what has already ended, so change is delayed.|The sun rising between two towers|Renewal waiting after every ending.
+balance, moderation, patience, blending|excess, imbalance, impatience, discord|Mix opposites into harmony through slow, steady integration.|Overdoing it, or parts of life pulling against each other.|Water poured between two cups|The flow of balance and gentle alchemy.
+attachment, temptation, bondage, materialism|release, breaking free, reclaiming power, awareness|Chains of habit or desire: you're more bound than you admit.|Recognizing the chains and starting to break free.|Loose chains around the figures' necks|Bonds you could lift off yourself.
+sudden upheaval, revelation, collapse, awakening|averted disaster, fear of change, delayed collapse, inner upheaval|False structures crumble suddenly; a shock that clears the way for truth.|Disaster narrowly avoided, or a collapse happening inside rather than out.|Lightning striking the crown|Truth shattering false foundations.
+hope, renewal, inspiration, serenity|despair, lost faith, discouragement, disconnection|After the storm, hope returns: healing and quiet inspiration.|Faith feels lost; you've disconnected from what inspires you.|Water poured onto both land and pool|Renewal flowing to body and spirit.
+illusion, uncertainty, anxiety, the subconscious|clarity returning, released fear, lifting fog, repressed emotion|Things aren't what they seem; move through uncertainty by intuition.|The fog starts to clear, or buried fears surface to be faced.|A path between a dog and a wolf|Walking between the tame and the wild mind.
+joy, success, vitality, positivity|temporary gloom, overconfidence, blocked joy, delays|Warmth, clarity and success; things are genuinely good.|Joy is dimmed or delayed, or optimism tips into overconfidence.|A child riding a white horse|Innocent, open-hearted joy.
+awakening, reckoning, calling, rebirth|harsh self-judgment, ignoring the call, regret, doubt|Answer a higher calling; reflect, forgive and rise renewed.|You're avoiding the call or judging yourself too harshly to move on.|The angel's trumpet|A call that wakes you to your purpose.
+completion, wholeness, accomplishment, travel|incompletion, loose ends, shortcuts, unfinished cycle|A cycle reaches a fulfilling end: integration and arrival.|Close to the finish, but something is left undone.|The oval wreath around the dancer|A journey brought full circle.
+inspiration, new venture, creative spark, potential|delays, lack of motivation, false start, blocked energy|A burst of creative energy: a new passion or project wants to begin.|The spark is there but won't catch; motivation stalls.|A sprouting wand held out from a cloud|A living gift of new energy.
+planning, future vision, decisions, discovery|fear of the unknown, poor planning, playing it safe, hesitation|Look past the horizon and plan your next big move.|Staying in your comfort zone instead of venturing out.|A globe held in one hand|The whole world of possibilities to plan for.
+expansion, foresight, progress, opportunity abroad|setbacks, slow progress, limited vision, frustration|Your plans are underway; watch your ships come in.|Plans hit delays and expansion is slower than hoped.|Ships sailing on the water below|Ventures sent out, results on their way.
+celebration, home, harmony, milestones|lack of support, unsettled home, cancelled plans, transition|A joyful milestone: homecoming and community celebration.|Celebrations fall flat or home life feels unsettled.|A garland strung across four wands|A gateway of shared joy.
+conflict, competition, disagreement, tension|avoiding conflict, truce, inner conflict, resolution|Clashing egos and competition; friction that can sharpen you.|Tension eases, or conflict is dodged rather than solved.|Five figures sparring with staffs|Scattered energy and rivalry.
+victory, recognition, success, public praise|ego, fall from grace, lack of recognition, private doubt|Public victory; you're recognized for your efforts.|Success without recognition, or pride before a fall.|A laurel wreath on the rider|Honor earned in public.
+defensiveness, perseverance, standing your ground, challenge|giving up, overwhelmed, exhaustion, yielding|Hold your position against challengers; defend what you've built.|Feeling overwhelmed and ready to give up the fight.|Standing on high ground|Defending a position from above.
+speed, movement, swift action, news|waiting, frustration, stalled momentum, slowing down|Things move fast; news and momentum arrive quickly.|Delays and stalled progress; frustrating waiting.|Wands flying through open air|Rapid movement with no obstacles.
+resilience, persistence, last stand, boundaries|paranoia, fatigue, surrender, guardedness|Wounded but standing; one more push before the finish.|Exhausted, or so guarded that you push help away.|A bandaged head|Battle scars carried with resolve.
+burden, responsibility, overwork, stress|release, delegating, breakdown, setting it down|Carrying too much; success has become a heavy load.|Putting the burden down, or collapsing under it.|A bundle of wands blocking the view|The load hides the goal.
+curiosity, enthusiasm, exploration, free spirit|lack of direction, impatience, procrastination, hasty ideas|An eager messenger of new ideas and adventures.|Enthusiasm without follow-through.|Salamanders on the tunic|Fire's creative, transforming spirit.
+energy, adventure, impulsiveness, passion|recklessness, haste, burnout, anger|Charging forward with passion and bold action.|Rushing ahead carelessly; anger or burnout.|A rearing horse|Passion that can't wait.
+confidence, warmth, determination, charisma|jealousy, insecurity, demanding, temper|Magnetic, confident and warm; leading with heart.|Confidence wavers into jealousy or demands.|A black cat at her feet|Intuitive, independent self-assurance.
+visionary leadership, entrepreneurship, honor, boldness|impulsive decisions, overbearing, high expectations, ruthlessness|A bold leader who turns vision into reality.|Leadership turns domineering or impulsive.|A salamander biting its own tail|Endless drive and creative fire.
+new love, compassion, emotional awakening, creativity|blocked emotions, emptiness, repressed feelings, self-love needed|An overflowing heart: new love or an emotional beginning.|Feelings are held back and the cup can't fill.|A dove dropping a wafer into the cup|Spirit filling the heart.
+partnership, mutual attraction, unity, connection|imbalance, breakup, miscommunication, mistrust|A balanced bond built on mutual respect.|A partnership falls out of balance.|A winged lion's head over the caduceus|Two energies united into healing.
+friendship, celebration, community, joy|overindulgence, gossip, isolation, three's a crowd|Friends gathering to celebrate.|Too much partying, or social drama.|Three cups raised in a circle|Shared happiness.
+apathy, contemplation, reevaluation, missed chances|renewed interest, acceptance, seizing chances, re-engaging|Bored or discontent, and missing what's being offered.|Waking up to new opportunities.|A cup offered from a cloud|The gift you aren't noticing.
+loss, grief, regret, disappointment|acceptance, moving on, forgiveness, recovery|Focusing on what's spilled and lost.|Turning to see what remains; healing begins.|Two cups still standing behind the figure|What isn't lost yet.
+nostalgia, childhood memories, innocence, kindness|stuck in the past, rose-tinted memories, growing up, leaving home|Sweet memories and simple kindness.|Clinging to the past; time to grow up.|Flowers in cups passed between children|Innocent giving.
+choices, illusion, fantasy, wishful thinking|clarity, focus, decisiveness, reality check|Too many dreamy options, and not all of them are real.|Illusions clear and you choose with focus.|Cups floating in the clouds|Temptations and daydreams.
+walking away, seeking deeper meaning, withdrawal, disillusionment|fear of change, aimless drifting, staying too long, avoidance|Leaving something that no longer fulfills you.|Afraid to leave, or drifting without purpose.|A figure walking off under the moon|Choosing the unknown over emptiness.
+contentment, wishes fulfilled, satisfaction, gratitude|smugness, dissatisfaction, indulgence, unmet wishes|The wish card: satisfaction and pleasure.|Wishes granted but hollow, or not granted at all.|A satisfied man before a row of cups|Desire fulfilled.
+harmony, family, lasting happiness, emotional fulfillment|broken home, disconnection, misaligned values, strained family|Lasting joy at home and emotional fulfillment.|Domestic tension; the ideal picture cracks.|A rainbow of cups over the family|Blessed, lasting harmony.
+creative opportunity, intuitive message, curiosity, sensitivity|emotional immaturity, creative block, moodiness, escapism|A sweet, surprising message from the heart.|Moodiness or blocked creativity.|A fish popping out of the cup|A surprise from the unconscious.
+romance, charm, following the heart, idealism|unrealistic, jealousy, disappointment, fickle moods|The romantic, offering their heart.|Charm without substance; mood swings.|A winged helmet|Imagination carrying the heart.
+compassion, emotional security, intuition, calm|codependence, martyrdom, emotional overwhelm, insecurity|Caring and intuitive, holding space for others.|Giving too much until emotions overflow.|A closed, ornate cup|Deep feeling, carefully guarded.
+emotional balance, diplomacy, wisdom, generosity|manipulation, emotional coldness, volatility, suppressed feelings|Calm mastery of emotions amid turbulent seas.|Emotions suppressed or used to manipulate.|A throne floating on a rough sea|Staying steady amid emotional waves.
+clarity, breakthrough, truth, sharp mind|confusion, misinformation, clouded judgment, harsh words|A breakthrough idea cuts through confusion.|Mental fog, or truth used as a weapon.|A crowned sword|The mind's power to decide and cut through.
+indecision, stalemate, avoidance, difficult choice|information overload, lesser of two evils, opening your eyes, confusion|Blindfolded and stuck between two choices.|Taking off the blindfold, or overwhelmed by options.|The blindfold|Refusing to look at what must be decided.
+heartbreak, grief, sorrow, painful truth|healing, forgiveness, releasing pain, optimism|Painful truth or heartbreak.|Healing from sorrow as the rain passes.|A heart pierced by three swords|Pain that brings clarity.
+rest, recovery, contemplation, retreat|restlessness, burnout, returning to action, overexertion|Time to rest and recover.|Burnout from refusing rest, or ready to return.|A knight lying on a tomb|Deliberate stillness.
+defeat, winning at all costs, betrayal, hollow victory|reconciliation, making amends, past resentment, moving on|A victory that costs your relationships.|Making peace after conflict.|Gathering swords as others walk away|Winning, but alone.
+transition, moving on, leaving behind, calmer waters|resistance to change, unfinished business, turbulence, stuck|Moving toward calmer waters.|You can't leave the past behind.|A boat crossing the water|Passage away from trouble.
+deception, strategy, sneaking away, getting away with it|confession, conscience, coming clean, getting caught|Acting alone or by stealth; watch for deceit.|Secrets come out, or the conscience speaks.|Tiptoeing off with an armful of swords|Cunning that may cut both ways.
+restriction, feeling trapped, victim mindset, self-limiting beliefs|release, new perspective, freedom, self-acceptance|Feeling trapped by your own thoughts.|Breaking free of a mental prison.|Loose bindings and an open path|The trap is mostly in the mind.
+anxiety, worry, nightmares, fear|hope, reaching out, easing worry, sleep returning|Sleepless worry and dread.|Anxiety eases, or you reach out for help.|Sitting up in bed, face in hands|Fears are loudest at night.
+painful ending, rock bottom, betrayal, crisis|regeneration, survival, slow recovery, resisting the inevitable|It's over, and it can't get worse.|Rising from rock bottom.|Dawn breaking on the horizon|After the worst, the sun rises.
+curiosity, new ideas, communication, vigilance|gossip, all talk, hastiness, scattered thoughts|A sharp, inquisitive mind.|Talk without action, or spreading rumors.|Wind-swept clouds behind the figure|Restless, quick thoughts.
+ambition, fast thinking, decisive action, drive|impulsiveness, rudeness, no direction, carelessness|Charging ahead with sharp focus.|Reckless words and rushed action.|Galloping into the wind|The speed of thought.
+clear boundaries, independence, honesty, perception|coldness, bitterness, cruelty, harsh judgment|Clear-eyed honesty with fair boundaries.|Truth turned cold or cruel.|One hand raised in welcome|Openness, but on clear terms.
+intellectual power, authority, truth, clear judgment|abuse of power, cold logic, tyranny, manipulation of facts|Decisions made with rigorous, fair logic.|Intellect used to dominate.|An upright sword held beside the throne|Judgment backed by authority.
+opportunity, prosperity, new venture, manifestation|lost opportunity, poor planning, scarcity, bad investment|A seed of material opportunity.|An opportunity slips away.|A garden gate leading to the mountains|A path toward tangible growth.
+balance, adaptability, juggling, priorities|overwhelm, disorganization, overcommitment, dropping the ball|Juggling responsibilities gracefully.|Too many balls in the air, and some fall.|An infinity loop around two coins|Endless balancing.
+teamwork, collaboration, skill, learning|disharmony, poor teamwork, misalignment, mediocrity|Skilled people building something together.|The team is out of sync.|A cathedral arch|Craft that needs many hands.
+security, saving, control, conservation|greed, stinginess, loosening your grip, overspending|Holding tight to what you have.|Too stingy, or finally loosening the grip.|A coin clutched to the chest|Fear of losing security.
+hardship, poverty, isolation, worry|recovery, help arriving, improvement, finding shelter|Hard times and feeling left out in the cold.|Recovery begins and help appears.|A lit church window above the figures|Help that's close by but unnoticed.
+generosity, charity, giving and receiving, fairness|debt, strings attached, one-sided giving, power imbalance|Giving and receiving in balance.|Generosity with strings attached.|Scales in the giver's hand|Measured, fair giving.
+patience, long-term view, investment, assessment|impatience, poor returns, wasted effort, distraction|Waiting for your investment to grow.|Effort without reward; impatience.|Leaning on a hoe beside the vine|Pausing to assess the crop.
+diligence, mastery, craftsmanship, dedication|perfectionism, lack of focus, shortcuts, uninspired work|Dedicated practice toward mastery.|Cutting corners, or burning out on perfectionism.|Carving coin after coin|Repetition building skill.
+abundance, independence, luxury, self-sufficiency|financial setbacks, overwork, superficiality, dependence|Enjoying the fruits of your own labor.|Independence shaken, or luxury that feels hollow.|A hooded falcon on her glove|Disciplined refinement.
+wealth, legacy, family, long-term success|financial failure, family disputes, lost legacy, instability|Lasting wealth and a family legacy.|Inheritance disputes; the legacy is at risk.|Three generations in one scene|Wealth that lasts across time.
+ambition, study, new skill, diligence|procrastination, lack of progress, laziness, missed lessons|A student eager to learn practical skills.|Plans that never get started.|Gazing intently at the coin|Studying the material world.
+hard work, reliability, routine, persistence|boredom, stagnation, inertia, workaholism|Slow, steady and dependable.|Stuck in a dull routine.|A horse standing perfectly still|Patient, steady progress.
+nurturing, practicality, abundance, down-to-earth|self-neglect, work-life imbalance, smothering, insecurity|Practical care that creates comfort.|Neglecting yourself or your home.|A rabbit in the corner|Fertility and earthy abundance.
+wealth, business, security, discipline|greed, stubbornness, materialism, poor decisions|A steady, prosperous provider.|Wealth hoarded or mishandled.|Grapes woven into his robe|The rich harvest of steady work.
+`.trim().split("\n");
+
+const MAJ = [
+  ["The Fool","air","Air"],["The Magician","☿","Mercury"],["The High Priestess","☽","the Moon"],["The Empress","♀","Venus"],
+  ["The Emperor","♈","Aries"],["The Hierophant","♉","Taurus"],["The Lovers","♊","Gemini"],["The Chariot","♋","Cancer"],
+  ["Strength","♌","Leo"],["The Hermit","♍","Virgo"],["Wheel of Fortune","♃","Jupiter"],["Justice","♎","Libra"],
+  ["The Hanged Man","water","Water"],["Death","♏","Scorpio"],["Temperance","♐","Sagittarius"],["The Devil","♑","Capricorn"],
+  ["The Tower","♂","Mars"],["The Star","♒","Aquarius"],["The Moon","♓","Pisces"],["The Sun","☉","the Sun"],
+  ["Judgement","fire","Fire"],["The World","♄","Saturn"]
+];
+const ROMAN = ["0","I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV","XVI","XVII","XVIII","XIX","XX","XXI"];
+const RANKS = ["Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Page","Knight","Queen","King"];
+const SUITS = [
+  {key:"wands",name:"Wands",el:"Fire",color:"var(--fire)",theme:"passion, action and creative drive"},
+  {key:"cups",name:"Cups",el:"Water",color:"var(--water)",theme:"emotions, love and intuition"},
+  {key:"swords",name:"Swords",el:"Air",color:"var(--air)",theme:"thoughts, words and conflict"},
+  {key:"pentacles",name:"Pentacles",el:"Earth",color:"var(--earth)",theme:"money, work and the body"}
+];
+const RANK_NOTE = ["the seed of the suit's energy","balance, duality and choice","growth and first results","stability and pause","conflict and challenge","harmony and recovery","assessment and testing","movement and mastery","culmination, nearly there","completion, sometimes too much",
+  "a student or messenger","action and pursuit","inner mastery, nurturing the suit","outer mastery, leading with the suit"];
+
+const split = s => s.split(",").map(x => x.trim());
+const CARDS = RAW.map((line, i) => {
+  const [up, rev, upM, revM, sym, symM] = line.split("|");
+  const c = {id:i, up:split(up), rev:split(rev), upM, revM, sym, symM};
+  if (i < 22) { c.major = true; c.num = i; c.name = MAJ[i][0]; c.glyph = MAJ[i][1]; c.corr = MAJ[i][2]; }
+  else { const s = Math.floor((i-22)/14), r = (i-22)%14; c.suit = SUITS[s]; c.rank = r; c.name = RANKS[r] + " of " + SUITS[s].name; }
+  return c;
+});
+const LESSONS = [];
+CARDS.forEach(c => { LESSONS.push({card:c, rev:false}); LESSONS.push({card:c, rev:true}); });
+const UNITS = [
+  {title:"The Major Arcana", eyebrow:"Unit 1 · 22 archetypes", blurb:"The Fool's journey: life's big lessons, from 0 to XXI.", color:"var(--accent)", from:0, to:44},
+  ...SUITS.map((s, k) => ({title:"Suit of " + s.name, eyebrow:`Unit ${k+2} · ${s.el}`, blurb:"The Minor Arcana of " + s.theme + ".", color:s.color, from:44 + k*28, to:72 + k*28}))
+];
+
+/* ---------------- Card art (drawn, not copied) ---------------- */
+function suitIcon(key, x, y, s, col){
+  const t = `transform="translate(${x} ${y}) scale(${s})"`;
+  if (key === "wands") return `<g ${t}><rect x="-2.2" y="-12" width="4.4" height="24" rx="2.2" fill="${col}"/><ellipse cx="5" cy="-6" rx="3.4" ry="1.7" fill="var(--leaf)" transform="rotate(-30 5 -6)"/><ellipse cx="-5" cy="2" rx="3.4" ry="1.7" fill="var(--leaf)" transform="rotate(30 -5 2)"/></g>`;
+  if (key === "cups") return `<g ${t}><path d="M-9 -11H9C9 -1 4.5 2.5 0 2.5S-9 -1 -9 -11Z" fill="${col}"/><rect x="-1.6" y="2" width="3.2" height="6.5" fill="${col}"/><ellipse cx="0" cy="10" rx="6.5" ry="2.2" fill="${col}"/></g>`;
+  if (key === "swords") return `<g ${t}><path d="M0 -13L2.4 -9V5.5H-2.4V-9Z" fill="${col}"/><rect x="-7.5" y="5.5" width="15" height="2.8" rx="1.2" fill="var(--gold)"/><rect x="-1.3" y="8.2" width="2.6" height="3.8" fill="${col}"/><circle cx="0" cy="13" r="1.9" fill="var(--gold)"/></g>`;
+  // pentacles
+  let pts = [];
+  for (let k = 0; k < 5; k++){ const a = -Math.PI/2 + k*4*Math.PI/5; pts.push((7.6*Math.cos(a)).toFixed(2)+","+(7.6*Math.sin(a)).toFixed(2)); }
+  return `<g ${t}><circle r="11" fill="var(--gold)"/><circle r="9.3" fill="none" stroke="${col}" stroke-width="1.4"/><polygon points="${pts.join(" ")}" fill="none" stroke="${col}" stroke-width="1.4" stroke-linejoin="round"/></g>`;
+}
+const PIPS = {
+  1:[[60,95]], 2:[[60,62],[60,128]], 3:[[60,55],[60,95],[60,135]],
+  4:[[40,62],[80,62],[40,128],[80,128]], 5:[[40,58],[80,58],[60,95],[40,132],[80,132]],
+  6:[[40,55],[80,55],[40,95],[80,95],[40,135],[80,135]], 7:[[40,55],[80,55],[60,75],[40,95],[80,95],[40,135],[80,135]],
+  8:[[40,52],[80,52],[60,73],[40,95],[80,95],[60,117],[40,138],[80,138]],
+  9:[[40,50],[80,50],[40,80],[80,80],[60,95],[40,110],[80,110],[40,140],[80,140]],
+  10:[[40,50],[80,50],[60,65],[40,82],[80,82],[40,108],[80,108],[60,125],[40,140],[80,140]]
+};
+function crown(points){
+  const w = 30, x0 = 45, top = 46, base = 58; let d = `M${x0} ${base}`;
+  for (let k = 0; k < points; k++){ const xa = x0 + w*k/points, xm = xa + w/(2*points); d += ` L${xa} ${top+6} L${xm} ${top}`; }
+  d += ` L${x0+w} ${top+6} L${x0+w} ${base} Z`;
+  return `<path d="${d}" fill="var(--gold)" stroke="var(--card-ink)" stroke-width="1" stroke-linejoin="round"/>`;
+}
+function majorArt(c){
+  const col = "var(--major)";
+  let rays = "";
+  for (let k = 0; k < 12; k++){ const a = k*Math.PI/6, r1 = 47, r2 = k%2 ? 52 : 56;
+    rays += `<line x1="${(60+r1*Math.cos(a)).toFixed(1)}" y1="${(96+r1*Math.sin(a)).toFixed(1)}" x2="${(60+r2*Math.cos(a)).toFixed(1)}" y2="${(96+r2*Math.sin(a)).toFixed(1)}" stroke="var(--gold)" stroke-width="1.6" stroke-linecap="round"/>`; }
+  let g;
+  if (c.glyph === "air" || c.glyph === "fire") g = `<path d="M60 74L83 112H37Z" fill="none" stroke="${col}" stroke-width="4.5" stroke-linejoin="round"/>` + (c.glyph === "air" ? `<line x1="42" y1="99" x2="78" y2="99" stroke="${col}" stroke-width="4.5"/>` : "");
+  else if (c.glyph === "water") g = `<path d="M37 80H83L60 118Z" fill="none" stroke="${col}" stroke-width="4.5" stroke-linejoin="round"/>`;
+  else g = `<text x="60" y="110" text-anchor="middle" font-size="40" fill="${col}" font-family="'Apple Symbols','Segoe UI Symbol','Noto Sans Symbols','DejaVu Sans',serif">${c.glyph}︎</text>`;
+  return `<circle cx="60" cy="96" r="40" fill="var(--gold-soft-card)" stroke="var(--gold)" stroke-width="1.6"/>${rays}${g}`;
+}
+function minorArt(c){
+  const key = c.suit.key, col = c.suit.color;
+  if (c.rank < 10){ const n = c.rank + 1, sc = n === 1 ? 2.5 : n <= 3 ? 1.3 : n <= 6 ? 1.05 : .85;
+    return PIPS[n].map(([x,y]) => suitIcon(key, x, y, sc, col)).join(""); }
+  const crowns = [0,0,3,5][c.rank-10];
+  return `<circle cx="60" cy="100" r="34" fill="none" stroke="var(--gold)" stroke-width="1.2" stroke-dasharray="2 3"/>` + (crowns ? crown(crowns) : "") + suitIcon(key, 60, 104, 2, col)
+    + (c.rank === 11 ? `<path d="M40 136 L60 128 L80 136" fill="none" stroke="${col}" stroke-width="3" stroke-linecap="round"/>` : "")
+    + (c.rank === 10 ? `<circle cx="60" cy="58" r="3.2" fill="var(--gold)"/>` : "");
+}
+function cardSVG(c, rev, cls){
+  const top = c.major ? ROMAN[c.num] : (c.rank === 0 ? "A" : c.rank < 10 ? String(c.rank+1) : ["P","Kn","Q","K"][c.rank-10]);
+  const label = (c.major ? c.name.replace(/^The /,"") : c.name).toUpperCase();
+  const fit = label.length > 12 ? ` textLength="82" lengthAdjust="spacingAndGlyphs"` : "";
+  return `<svg class="${cls||""}" viewBox="0 0 120 200" role="img" aria-label="${esc(c.name)}${rev ? ", reversed" : ""}" style="--gold-soft-card:#f7ecd0">
+    <rect x="2" y="2" width="116" height="196" rx="10" fill="var(--card)" stroke="var(--card-edge)" stroke-width="2"/>
+    <rect x="9" y="9" width="102" height="182" rx="6" fill="none" stroke="var(--gold)" stroke-width="1.4"/>
+    <g${rev ? ' transform="rotate(180 60 100)"' : ""}>
+      <text x="60" y="31" text-anchor="middle" font-family="Cinzel,Georgia,serif" font-size="14" font-weight="700" fill="var(--card-ink)">${top}</text>
+      ${c.major ? majorArt(c) : minorArt(c)}
+      <rect x="16" y="163" width="88" height="21" rx="3" fill="none" stroke="var(--gold)" stroke-width="1"/>
+      <text x="60" y="177.5" text-anchor="middle" font-family="Cinzel,Georgia,serif" font-size="8" font-weight="700" fill="var(--card-ink)" letter-spacing=".6"${fit}>${esc(label)}</text>
+    </g></svg>`;
+}
+
+/* ---------------- Icons ---------------- */
+const ICON = {
+  flame:`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 3.5 5.5 6 5.5 11a5.5 5.5 0 0 1-11 0c0-2.6 1.4-4.2 2.6-5.4.2 1.7.9 2.9 2.1 3.4C11 8.6 11 5 12 2z" fill="currentColor"/><path d="M12 13.5c1 1.2 2.4 2 2.4 3.8a2.4 2.4 0 0 1-4.8 0c0-1.5.9-2.3 2.4-3.8z" fill="var(--gold)"/></svg>`,
+  star:`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.8 6 6.5.7-4.9 4.4 1.4 6.4L12 16.8 6.2 20l1.4-6.4L2.7 9.2l6.5-.7z" fill="currentColor"/></svg>`,
+  cards:`<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="11" height="16" rx="2" transform="rotate(-10 8.5 13)" fill="currentColor" opacity=".45"/><rect x="9" y="3" width="11" height="16" rx="2" fill="currentColor"/></svg>`,
+  heart:`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.4C.9 8 3 4 6.8 4c2.2 0 3.6 1.2 5.2 3 1.6-1.8 3-3 5.2-3C21 4 23.1 8 21.6 11.6 19.5 16.4 12 21 12 21z" fill="currentColor"/></svg>`,
+  heartEmpty:`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.4C.9 8 3 4 6.8 4c2.2 0 3.6 1.2 5.2 3 1.6-1.8 3-3 5.2-3C21 4 23.1 8 21.6 11.6 19.5 16.4 12 21 12 21z" fill="none" stroke="currentColor" stroke-width="2" opacity=".4"/></svg>`,
+  check:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>`,
+  cross:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>`,
+  flip:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v16M6 14l6 6 6-6"/></svg>`,
+  lock:`<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="currentColor"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>`
+};
+
+/* ---------------- Helpers ---------------- */
+function esc(s){ return String(s).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch])); }
+const rnd = n => Math.floor(Math.random()*n);
+const pick = a => a[rnd(a.length)];
+function shuffle(a){ a = a.slice(); for (let i = a.length-1; i > 0; i--){ const j = rnd(i+1); [a[i],a[j]] = [a[j],a[i]]; } return a; }
+const face = (c, rev) => rev ? {kw:c.rev, m:c.revM} : {kw:c.up, m:c.upM};
+const orient = rev => rev ? "reversed" : "upright";
+function otherCards(c, n, sameGroup){
+  let pool = CARDS.filter(x => x !== c && (!sameGroup || !!x.major === !!c.major));
+  return shuffle(pool).slice(0, n);
+}
+function distractKw(c, rev, n){
+  const own = new Set([...c.up, ...c.rev]); const seen = new Set(); const out = [];
+  for (const x of shuffle(CARDS)){ if (x === c) continue; const k = pick(face(x, rev).kw);
+    if (own.has(k) || seen.has(k)) continue; seen.add(k); out.push(k); if (out.length === n) break; }
+  return out;
+}
+function dstr(d){ return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); }
+const today = () => dstr(new Date());
+const yesterday = () => { const d = new Date(); d.setDate(d.getDate()-1); return dstr(d); };
+
+/* ---------------- Progress state ---------------- */
+const KEY = "arcana-daily-v1";
+let S = {completed:0, xp:0, streak:0, best:0, lastDate:null, history:{}};
+function normalize(r){ return {completed:+r.completed||0, xp:+r.xp||0, streak:+r.streak||0, best:+r.best||0, lastDate:r.lastDate||null, history:r.history && typeof r.history === "object" ? {...r.history} : {}}; }
+try { const raw = localStorage.getItem(KEY); if (raw) S = normalize(JSON.parse(raw)); } catch(e){}
+let dbDoc = null, dbChain = Promise.resolve();
+function save(){
+  try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){}
+  if (dbDoc){ const snap = JSON.parse(JSON.stringify(S)); dbChain = dbChain.then(() => dbDoc.set(snap)).catch(() => {}); }
+}
+const liveStreak = () => (S.lastDate === today() || S.lastDate === yesterday()) ? S.streak : 0;
+const doneToday = () => S.lastDate === today();
+const allDone = () => S.completed >= LESSONS.length;
+
+/* Sync to the viewer's own account when the page runs inside claude.ai */
+(async () => {
+  try {
+    if (!window.claude || !window.claude.use) return;
+    const [db, user] = await Promise.all([claude.use("db"), claude.use("user")]);
+    if (!db || !user) return;
+    const id = await user.id(); if (!id) return;
+    const ref = db.doc("data/users/" + id + "/progress");
+    const snap = await ref.get();
+    dbDoc = ref;
+    if (snap.exists){
+      const r = normalize(snap.data() || {});
+      if (r.completed > S.completed || (r.completed === S.completed && r.xp > S.xp)){ S = r; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} renderHome(); }
+      else if (S.completed > r.completed || S.xp > r.xp) save();
+    } else if (S.completed > 0 || S.xp > 0) save();
+    document.getElementById("sync").textContent = "Progress is saved to your account.";
+  } catch(e){}
+})();
+
+/* ---------------- Home ---------------- */
+function lessonTitle(i){ const L = LESSONS[i]; return L.card.name + (L.rev ? " · reversed" : ""); }
+function shortLabel(i){ const L = LESSONS[i], c = L.card;
+  const n = c.major ? c.name.replace(/^The /,"") : (c.rank === 0 ? "Ace" : c.rank < 10 ? String(c.rank+1) : RANKS[c.rank]) + (c.major ? "" : " of " + c.suit.name);
+  return n + (L.rev ? " ↓" : ""); }
+function nodeIcon(L){
+  const c = L.card;
+  let inner = c.major ? `<span class="num">${ROMAN[c.num]}</span>` : `<svg viewBox="-16 -16 32 32" aria-hidden="true">${suitIcon(c.suit.key, 0, 0, 1.15, "currentColor")}</svg>`;
+  return inner + (L.rev ? `<span class="rev-mark">${ICON.flip}</span>` : "");
+}
+function renderStats(){
+  const st = liveStreak();
+  const s = document.getElementById("st-streak"); s.innerHTML = ICON.flame + st; s.classList.toggle("off", !doneToday());
+  s.title = st + "-day streak" + (doneToday() ? "" : " (do today's lesson to keep it)");
+  document.getElementById("st-xp").innerHTML = ICON.star + S.xp;
+  document.getElementById("st-cards").innerHTML = ICON.cards + S.completed + "<span style=\"opacity:.55\">/" + LESSONS.length + "</span>";
+}
+function untilMidnight(){ const n = new Date(), m = new Date(n); m.setHours(24,0,0,0); const mins = Math.ceil((m-n)/60000); const h = Math.floor(mins/60); return h ? `${h}h ${mins%60}m` : `${mins}m`; }
+function renderToday(){
+  const el = document.getElementById("today");
+  if (allDone()){
+    el.innerHTML = `${cardSVG(CARDS[21], false, "mini-card")}<div class="info"><p class="eyebrow">All 156 lessons complete</p><h2>The World is yours</h2><p>You've studied every card upright and reversed. Keep your memory sharp with reviews.</p><div class="actions"><button class="btn gold" id="btn-review">Review a card</button></div></div>`;
+  } else if (doneToday()){
+    const L = LESSONS[S.completed];
+    el.innerHTML = `${cardSVG(L.card, L.rev, "mini-card")}<div class="info"><p class="eyebrow">Day ${S.completed} done · next card in ${untilMidnight()}</p><h2>Come back tomorrow</h2><p>Tomorrow: <b>${esc(lessonTitle(S.completed))}</b>. Until then, review a card you've already learned.</p><div class="actions"><button class="btn gold" id="btn-review">Review a card</button></div></div>`;
+  } else {
+    const i = S.completed, L = LESSONS[i];
+    el.innerHTML = `${cardSVG(L.card, L.rev, "mini-card")}<div class="info"><p class="eyebrow">Day ${i+1} of ${LESSONS.length} · today's card</p><h2>${esc(L.card.name)}</h2><span class="chip${L.rev ? " rev" : ""}">${orient(L.rev)}</span><div class="actions"><button class="btn" id="btn-start">Start lesson</button>${S.completed ? `<button class="btn ghost" id="btn-review">Review</button>` : ""}</div></div>`;
+  }
+  const b = document.getElementById("btn-start"); if (b) b.onclick = () => openLesson(S.completed, false);
+  const r = document.getElementById("btn-review"); if (r) r.onclick = randomReview;
+}
+function renderPath(){
+  const host = document.getElementById("units");
+  let html = "";
+  UNITS.forEach(u => {
+    const done = Math.max(0, Math.min(u.to, S.completed) - u.from), total = u.to - u.from;
+    html += `<section class="unit"><div class="unit-head" style="--u:${u.color}"><p class="eyebrow">${u.eyebrow}</p><h2>${u.title}</h2><p>${u.blurb}</p><div class="bar" aria-label="${done} of ${total} lessons"><i style="width:${(done/total*100).toFixed(1)}%"></i></div></div><ol class="path">`;
+    for (let i = u.from; i < u.to; i++){
+      const L = LESSONS[i], x = Math.round(Math.sin(i*0.75)*62);
+      let st = i < S.completed ? "done" : i === S.completed ? (doneToday() ? "waiting" : "current") : "locked";
+      const isCur = st === "current";
+      html += `<li class="node-wrap${isCur ? " is-current" : ""}" style="--x:${x}px">${isCur ? `<span class="start-bubble">Today</span>` : ""}<button class="node ${st}" data-i="${i}" aria-label="${esc(lessonTitle(i))}: ${st === "done" ? "review" : st === "current" ? "start" : "locked"}" title="${esc(lessonTitle(i))}">${st === "locked" && i > S.completed + 2 ? `<svg viewBox="0 0 24 24" style="width:26px;height:26px">${ICON.lock.replace(/<\/?svg[^>]*>/g,"")}</svg>` : nodeIcon(L)}</button><span class="node-label">${esc(shortLabel(i))}</span></li>`;
+    }
+    html += `</ol></section>`;
+  });
+  host.innerHTML = html;
+}
+document.getElementById("units").addEventListener("click", e => {
+  const b = e.target.closest(".node"); if (!b) return;
+  const i = +b.dataset.i;
+  if (i < S.completed) openLesson(i, true);
+  else if (i === S.completed && !doneToday() && !allDone()) openLesson(i, false);
+  else if (i === S.completed) toast(`${lessonTitle(i)} unlocks tomorrow. New card in ${untilMidnight()}.`);
+  else toast(`One card a day. Finish ${lessonTitle(S.completed)} first.`);
+});
+function renderHome(){ renderStats(); renderToday(); renderPath(); }
+function scrollToCurrent(){
+  const n = document.querySelector(".node.current, .node.waiting"); if (!n) return;
+  const r = n.getBoundingClientRect(); if (r.top > innerHeight*0.8) window.scrollTo({top: scrollY + r.top - innerHeight*0.45});
+}
+let toastT;
+function toast(msg){ const t = document.getElementById("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 2600); }
+function randomReview(){ if (!S.completed){ toast("Finish your first lesson to unlock reviews."); return; } openLesson(rnd(S.completed), true); }
+
+/* ---------------- Questions ---------------- */
+function single(kind, prompt, correct, wrong, extra){ const options = shuffle([correct, ...wrong]); return {type:"single", kind, prompt, options, answer:options.indexOf(correct), ...extra}; }
+function multi(kind, prompt, rights, wrongs, extra){ const options = shuffle([...rights, ...wrongs]); return {type:"multi", kind, prompt, options, answers:rights.map(r => options.indexOf(r)), ...extra}; }
+function buildQuestions(i){
+  const L = LESSONS[i], c = L.card, rev = L.rev, f = face(c, rev), o = orient(rev), qs = [];
+  const card = {art:c, rev};
+  qs.push(single("Keyword", `Which word belongs to ${c.name} ${o}?`, pick(f.kw), distractKw(c, rev, 3), {show:card}));
+  qs.push(single("Meaning", `What does ${c.name} mean ${o}?`, f.m, otherCards(c, 3, true).map(x => face(x, rev).m), {show:card}));
+  qs.push(multi("Select all", `Tap the three keywords of ${c.name} ${o}.`, shuffle(f.kw).slice(0, 3), distractKw(c, rev, 3), {grid:true}));
+  qs.push(single("Symbol", `In ${c.name}, what does this image represent?`, c.symM, otherCards(c, 3).map(x => x.symM), {quote:c.sym, show:{art:c, rev:false}}));
+  if (rev){
+    qs.push(single("Upright or reversed?", `Which reading is ${c.name} reversed?`, c.revM, [c.upM, ...otherCards(c, 2, true).map(x => x.upM)]));
+    const fromRev = Math.random() < .5, k = pick(fromRev ? c.rev : c.up);
+    qs.push(single("Upright or reversed?", `In ${c.name}, does this keyword come from the upright or the reversed card?`, fromRev ? "Reversed" : "Upright", [fromRev ? "Upright" : "Reversed"], {quote:k, keep:true, show:{art:c, rev:fromRev}}));
+  } else if (c.major){
+    qs.push(single("Correspondence", `Which astrological or elemental correspondence belongs to ${c.name}?`, cap(c.corr), shuffle(MAJ.filter(m => m[0] !== c.name)).slice(0, 3).map(m => cap(m[2])), {show:card}));
+    qs.push(single("Name the card", "Which card is described here?", c.name, otherCards(c, 3, true).map(x => x.name), {quote:c.upM}));
+  } else {
+    qs.push(single("The suit", `${c.suit.name} is the suit of which element and theme?`, `${c.suit.el}: ${c.suit.theme}`, SUITS.filter(s => s !== c.suit).map(s => `${s.el}: ${s.theme}`), {show:card}));
+    qs.push(single("The number", `In every suit, what does the ${RANKS[c.rank]} stand for?`, cap(RANK_NOTE[c.rank]), shuffle(RANK_NOTE.filter((_, k) => k !== c.rank)).slice(0, 3).map(cap)));
+  }
+  if (i > 0){
+    const j = rnd(i), R = LESSONS[j], rf = face(R.card, R.rev);
+    qs.push(single("Review", `Which word belongs to ${R.card.name} ${orient(R.rev)}?`, pick(rf.kw), distractKw(R.card, R.rev, 3), {show:{art:R.card, rev:R.rev}, review:true}));
+  }
+  return qs;
+}
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+/* ---------------- Lesson runner ---------------- */
+const $stage = document.getElementById("stage"), $foot = document.getElementById("foot"), $footIn = document.getElementById("foot-inner");
+let R = null;
+function openLesson(i, isReview){
+  R = {i, isReview, queue:buildQuestions(i), total:0, correct:0, firstTry:0, attempts:0, hearts:3, step:"learn", sel:new Set(), checked:false};
+  R.total = R.queue.length;
+  document.getElementById("home").hidden = true;
+  document.getElementById("sheet").hidden = false;
+  renderHearts(); setProgress(); showLearn();
+}
+function closeLesson(){ document.getElementById("sheet").hidden = true; document.getElementById("home").hidden = false; R = null; renderHome(); scrollToCurrent(); }
+document.getElementById("close").onclick = closeLesson;
+function renderHearts(){ document.getElementById("hearts").innerHTML = [0,1,2].map(k => k < R.hearts ? ICON.heart : ICON.heartEmpty).join(""); document.getElementById("hearts").setAttribute("aria-label", R.hearts + " hearts left"); }
+function setProgress(){ document.getElementById("prog").style.width = (R.step === "learn" ? 4 : Math.max(4, R.correct/R.total*100)) + "%"; }
+function footer(html, cls){ $foot.className = "sheet-foot gutter" + (cls ? " " + cls : ""); $footIn.innerHTML = html; }
+function showLearn(){
+  const L = LESSONS[R.i], c = L.card, f = face(c, L.rev), other = face(c, !L.rev);
+  const facts = [];
+  if (c.major) facts.push(`<div class="fact"><p class="eyebrow">Major Arcana ${ROMAN[c.num]}</p><p>Corresponds to <b>${esc(c.corr)}</b>.</p></div>`);
+  else facts.push(`<div class="fact"><p class="eyebrow">Suit of ${c.suit.name} · ${c.suit.el}</p><p>${cap(c.suit.theme)}. The ${RANKS[c.rank]} brings ${esc(RANK_NOTE[c.rank])}.</p></div>`);
+  facts.push(`<div class="fact"><p class="eyebrow">Look for</p><p><b>${esc(c.sym)}</b>: ${esc(c.symM.charAt(0).toLowerCase() + c.symM.slice(1))}</p></div>`);
+  facts.push(`<div class="fact"><p class="eyebrow">${L.rev ? "Compare upright" : "When reversed"}</p><p>${esc(other.m)}</p></div>`);
+  $stage.innerHTML = `<div class="learn">${cardSVG(c, L.rev, "big-card")}<div class="text">
+    <p class="eyebrow">${R.isReview ? "Review" : "New card"} · day ${R.i+1}</p>
+    <h1>${esc(c.name)}</h1><span class="chip${L.rev ? " rev" : ""}">${orient(L.rev)}</span>
+    <p class="meaning">${esc(f.m)}</p>
+    <div class="kws">${f.kw.map(k => `<span class="kw">${esc(k)}</span>`).join("")}</div>
+    <div class="facts">${facts.join("")}</div></div></div>`;
+  footer(`<button class="btn wide" id="go">Start quiz</button>`);
+  document.getElementById("go").onclick = nextQuestion;
+  document.getElementById("sheet-body").scrollTop = 0;
+}
+function nextQuestion(){
+  if (!R.queue.length) return finish();
+  R.step = "q"; R.q = R.queue.shift(); R.sel = new Set(); R.checked = false; setProgress();
+  const q = R.q;
+  const opts = q.options.map((t, k) => `<button class="opt" data-k="${k}" aria-pressed="false"><span class="key">${k+1}</span><span class="t">${esc(t)}</span></button>`).join("");
+  const main = `<p class="q-type${q.review ? " review" : ""}">${q.retry ? "Try again · " : ""}${esc(q.kind)}</p><h2 class="q-prompt">${esc(q.prompt)}</h2>${q.type === "multi" ? `<p class="q-sub">Choose exactly three.</p>` : ""}${q.quote ? `<p class="q-quote">${esc(q.quote)}</p>` : ""}<div class="options${q.grid || q.options.length === 2 ? " grid2" : ""}">${opts}</div>`;
+  $stage.innerHTML = q.show ? `<div class="q-row">${cardSVG(q.show.art, q.show.rev, "mid-card")}<div>${main}</div></div>` : main;
+  footer(`<button class="btn good wide" id="check" disabled>Check</button>`);
+  document.getElementById("check").onclick = check;
+  $stage.querySelectorAll(".opt").forEach(b => b.onclick = () => toggle(+b.dataset.k));
+  document.getElementById("sheet-body").scrollTop = 0;
+}
+function toggle(k){
+  if (!R || R.step !== "q" || R.checked || k >= R.q.options.length) return;
+  if (R.q.type === "single") R.sel = new Set([k]);
+  else { if (R.sel.has(k)) R.sel.delete(k); else if (R.sel.size < 3) R.sel.add(k); }
+  $stage.querySelectorAll(".opt").forEach(b => b.setAttribute("aria-pressed", R.sel.has(+b.dataset.k)));
+  document.getElementById("check").disabled = R.q.type === "single" ? R.sel.size !== 1 : R.sel.size !== 3;
+}
+const PRAISE = ["Well read!", "Exactly.", "The cards agree.", "Correct!", "Sharp intuition."];
+function check(){
+  const q = R.q; if (R.checked) return; R.checked = true;
+  const right = q.type === "single" ? new Set([q.answer]) : new Set(q.answers);
+  const ok = R.sel.size === right.size && [...R.sel].every(k => right.has(k));
+  $stage.querySelectorAll(".opt").forEach(b => { const k = +b.dataset.k; b.disabled = true;
+    if (right.has(k)) b.classList.add("right"); else if (R.sel.has(k)) b.classList.add("wrong"); });
+  R.attempts++;
+  if (ok){ R.correct++; if (!q.retry) R.firstTry++; }
+  else { R.hearts--; renderHearts(); R.queue.push({...q, retry:true, options:q.options}); }
+  setProgress();
+  const answerText = q.type === "single" ? q.options[q.answer] : q.answers.map(k => q.options[k]).join(", ");
+  const msg = ok ? `<strong>${pick(PRAISE)}</strong>` : `<strong>Not quite</strong><span>Correct answer: ${esc(answerText)}</span>`;
+  const out = !ok && R.hearts <= 0;
+  footer(`<div class="verdict"><div class="badge">${ok ? ICON.check : ICON.cross}</div><div style="min-width:0">${msg}${!ok && !out ? `<span style="opacity:.8">You'll see this one again.</span>` : ""}</div></div><button class="btn ${ok ? "good" : "bad"} wide" id="cont">${out ? "See result" : "Continue"}</button>`, ok ? "good" : "bad");
+  document.getElementById("cont").onclick = out ? outOfHearts : nextQuestion;
+}
+function outOfHearts(){
+  R.step = "end"; const L = LESSONS[R.i];
+  $stage.innerHTML = `<div class="end">${cardSVG(L.card, !L.rev, "big-card")}<h1 style="color:var(--bad)">Out of hearts</h1><p>${esc(L.card.name)} turned the tables this time. Read the card again and give it another try. Your streak is safe until midnight.</p></div>`;
+  footer(`<button class="btn wide" id="again">Try again</button><button class="btn ghost wide" id="quit">Back to path</button>`);
+  document.getElementById("again").onclick = () => openLesson(R.i, R.isReview);
+  document.getElementById("quit").onclick = closeLesson;
+}
+function finish(){
+  R.step = "end";
+  const L = LESSONS[R.i], acc = Math.round(R.firstTry / R.total * 100);
+  let gained = R.isReview ? 5 + R.hearts : 10 + R.hearts*2, headline = "Lesson complete!", note;
+  if (!R.isReview && R.i === S.completed && !doneToday()){
+    S.streak = S.lastDate === yesterday() ? S.streak + 1 : 1;
+    S.best = Math.max(S.best, S.streak);
+    S.lastDate = today(); S.history[R.i] = today(); S.completed++;
+    note = S.completed < LESSONS.length ? `Tomorrow's card: <b>${esc(lessonTitle(S.completed))}</b>.` : "You've finished the whole deck.";
+  } else { headline = "Review complete!"; note = "Reviews build memory without changing your daily card."; }
+  S.xp += gained; save();
+  document.getElementById("prog").style.width = "100%";
+  $stage.innerHTML = `<div class="end">${cardSVG(L.card, L.rev, "big-card")}<h1>${headline}</h1><p>${esc(L.card.name)} ${orient(L.rev)} is part of your deck now. ${note}</p>
+    <div class="tiles"><div class="tile" style="--tc:var(--gold)"><div class="h">XP</div><div class="v">+${gained}</div></div>
+    <div class="tile" style="--tc:var(--good)"><div class="h">Accuracy</div><div class="v">${acc}%</div></div>
+    <div class="tile" style="--tc:var(--fire)"><div class="h">Streak</div><div class="v">${liveStreak()}</div></div></div></div>`;
+  footer(`<button class="btn gold wide" id="done">Continue</button>`);
+  document.getElementById("done").onclick = closeLesson;
+}
+document.addEventListener("keydown", e => {
+  if (!R || document.getElementById("sheet").hidden) return;
+  if (e.key === "Escape"){ closeLesson(); return; }
+  if (R.step === "q" && !R.checked && /^[1-9]$/.test(e.key)){ toggle(+e.key - 1); return; }
+  if (e.key === "Enter" && !(e.target instanceof HTMLButtonElement)){
+    const b = document.getElementById("cont") || document.getElementById("check") || document.getElementById("go") || document.getElementById("done");
+    if (b && !b.disabled){ e.preventDefault(); b.click(); }
+  }
+});
+
+/* Re-render when the day rolls over while the page is open */
+let lastDay = today();
+setInterval(() => { if (today() !== lastDay){ lastDay = today(); if (!R) renderHome(); } else if (!R && doneToday()) renderToday(); }, 30000);
+
+renderHome();
+requestAnimationFrame(scrollToCurrent);
+</script>
